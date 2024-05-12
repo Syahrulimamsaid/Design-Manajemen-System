@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Tooltip } from '@mui/material';
+import { Button, Dialog, Tooltip } from '@mui/material';
 import React from 'react';
 import { dotStream } from 'ldrs';
 import { ToastContainer } from 'react-toastify';
@@ -10,11 +10,14 @@ import { jobResponse } from '../../Helpers/API/Job/QC/CheckJob';
 import Swal from 'sweetalert2';
 import DatePicker from '../../components/Forms/DatePicker/DatePicker';
 import { jobRevisionScheduled } from '../../Helpers/API/Job/Koor/JobRevisionAPI';
+import ButtonNegative from '../../layout/Button/ButtonNegative';
+import ButtonPositive from '../../layout/Button/ButtonPositive';
 
 export interface CancelResponseProps {
   open: boolean;
   onClose: (value: number) => void;
   job_kode: string;
+  kode: string;
   nama: string;
   perusahaan: string;
   designer: string;
@@ -22,8 +25,16 @@ export interface CancelResponseProps {
 }
 
 function CancelJob(props: CancelResponseProps) {
-  const { onClose, open, nama, job_kode, perusahaan, designer, tanggal_kirim } =
-    props;
+  const {
+    onClose,
+    open,
+    nama,
+    kode,
+    job_kode,
+    perusahaan,
+    designer,
+    tanggal_kirim,
+  } = props;
 
   const handleClose = (event: React.FormEvent) => {
     event.preventDefault();
@@ -48,38 +59,70 @@ function CancelJob(props: CancelResponseProps) {
   }, [open]);
 
   const handleCancelResponseJob = (event: React.FormEvent) => {
-    onClose(0);
-    Swal.fire({
-      icon: 'question',
-      title: 'Penolakan',
-      text: 'Yakin menolak pekerjaan ini ?',
-      confirmButtonText: 'Iya',
-      cancelButtonText: 'Tidak',
-      showCancelButton: true,
-    }).then(async (res) => {
-      if (res.isConfirmed) {
-        event.preventDefault();
-        setLoading(true);
-        try {
-          await jobResponse(token, job_kode, 1, komentar);
-
-          if (role == '1') {
-            await jobRevisionScheduled(token, job_kode, tanggal_pengumpulan);
+    if (role == '1') {
+      if (komentar && tanggal_pengumpulan) {
+        onClose(0);
+        Swal.fire({
+          icon: 'question',
+          title: 'Reject',
+          text: 'Yakin menolak pekerjaan ini ?',
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+          showCancelButton: true,
+        }).then(async (res) => {
+          if (res.isConfirmed) {
+            event.preventDefault();
+           handleResponse();
           }
-          setLoading(false);
-          onClose(0);
           setKomentar('');
-          notify('Berhasil menanggapi', 'success');
-        } catch (err) {
-          setLoading(false);
-          onClose(0);
-          setKomentar('');
-          if (err instanceof Error) {
-            notify(err.message, 'error');
-          }
-        }
+        });
+      } else {
+        notify('Komentar/Tanggal Pengumpulan belum diisi', 'info');
       }
-    });
+    }
+    else{
+      if (komentar) {
+        onClose(0);
+        Swal.fire({
+          icon: 'question',
+          title: 'Reject',
+          text: 'Yakin menolak pekerjaan ini ?',
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+          showCancelButton: true,
+        }).then(async (res) => {
+          if (res.isConfirmed) {
+            event.preventDefault();
+           handleResponse();
+          }
+          setKomentar('');
+        });
+      } else {
+        notify('Komentar belum diisi', 'info');
+      }
+    }
+  };
+
+  const handleResponse = async () => {
+    setLoading(true);
+    try {
+      await jobResponse(token, kode, 1, komentar);
+
+      if (role == '1') {
+        await jobRevisionScheduled(token, kode, tanggal_pengumpulan);
+      }
+      setLoading(false);
+      onClose(0);
+      setKomentar('');
+      notify('Berhasil menanggapi', 'success');
+    } catch (err) {
+      setLoading(false);
+      onClose(0);
+      setKomentar('');
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      }
+    }
   };
 
   const handleSelectedDate = (value: string) => {
@@ -91,10 +134,10 @@ function CancelJob(props: CancelResponseProps) {
       <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md">
         <div className="sm:grid-cols-2">
           <div className="flex flex-col gap-9">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                <h3 className="font-bold font-poppins text-black dark:text-white">
-                  Tolak Pekerjaan
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark pl-2 pr-2">
+              <div className="border-b border-[#7776ff] py-4 px-6.5 dark:border-strokedark">
+                <h3 className="font-bold font-poppins text-[#201650] dark:text-white">
+                  Rejected Job
                 </h3>
               </div>
               <div className="p-6.5 mb-4.5">
@@ -102,8 +145,20 @@ function CancelJob(props: CancelResponseProps) {
                   <div className="w-full xl:w-1/3 text-center">
                     {/* <div className=""> */}
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Nama
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Kode
+                      </label>
+                      <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
+                        {job_kode}
+                      </label>
+                    </div>
+                    {/* </div> */}
+                  </div>
+                  <div className="w-full xl:w-1/3 text-center">
+                    {/* <div className=""> */}
+                    <div className="mb-4.5">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Preparate
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
                         {nama}
@@ -114,8 +169,8 @@ function CancelJob(props: CancelResponseProps) {
                   <div className="w-full xl:w-1/3 text-center">
                     {/* <div className="p-6.5"> */}
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Perusahaan
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Customer
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
                         {perusahaan}
@@ -126,7 +181,7 @@ function CancelJob(props: CancelResponseProps) {
                   <div className="w-full xl:w-1/3 text-center">
                     {/* <div className="p-6.5"> */}
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
                         Designer
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
@@ -138,7 +193,7 @@ function CancelJob(props: CancelResponseProps) {
                 </div>
                 {role == '1' ? (
                   <div className="mb-4.5">
-                    <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                    <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                       Tanggal Pengumpulan Revisi{' '}
                       <Tooltip
                         children={<span className="text-meta-1">*</span>}
@@ -148,7 +203,6 @@ function CancelJob(props: CancelResponseProps) {
 
                     <DatePicker
                       onDateChange={handleSelectedDate}
-                      // status={statusTanggalKirim}
                       dateSelected={tanggal_pengumpulan}
                       maxDate={new Date(tanggal_kirim)}
                     />
@@ -157,7 +211,7 @@ function CancelJob(props: CancelResponseProps) {
                   ''
                 )}
                 <div className="mt-6 min-w-80">
-                  <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
+                  <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
                     Komentar{' '}
                     <Tooltip
                       children={<span className="text-meta-1">*</span>}
@@ -167,7 +221,7 @@ function CancelJob(props: CancelResponseProps) {
                   <textarea
                     rows={6}
                     placeholder="Masukkan komentar"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-[#00eb77] active:border-[#00eb77] disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#00eb77]"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-[#201650] outline-none transition focus:border-[#7776ff] active:border-[#7776ff] disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#7776ff]"
                     value={komentar}
                     onChange={(event) => setKomentar(event.target.value)}
                   ></textarea>
@@ -179,24 +233,17 @@ function CancelJob(props: CancelResponseProps) {
                     <l-dot-stream
                       size="100"
                       speed="3"
-                      color="green"
+                      color="#6456FE"
                     ></l-dot-stream>
                   </div>
                 ) : (
                   <div className="flex justify-center w-full gap-7">
-                    <button
-                      className="flex w-full justify-center rounded bg-slate-50 rounded-lg border border-slate-400 p-3 font-poppins font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={handleClose}
-                    >
-                      Batal
-                    </button>
+                    <ButtonNegative text="Cancel" Click={handleClose} />
 
-                    <button
-                      onClick={(event) => handleCancelResponseJob(event)}
-                      className="flex w-full justify-center rounded rounded-lg bg-[#00eb77] p-3 font-poppins font-medium text-slate-50 hover:bg-opacity-70"
-                    >
-                      Kirim
-                    </button>
+                    <ButtonPositive
+                      text="Send"
+                      Click={(event) => handleCancelResponseJob(event)}
+                    />
                   </div>
                 )}
               </div>

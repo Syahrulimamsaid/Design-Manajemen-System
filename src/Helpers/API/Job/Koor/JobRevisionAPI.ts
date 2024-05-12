@@ -1,4 +1,4 @@
-import { FormatDate } from '../../../ConvertDate/FormatDate';
+import { FormatDate } from '../../../Date/FormatDate';
 import URL from '../../URL';
 
 export async function getRevision(token: string | null) {

@@ -16,3 +16,13 @@ export const formattedDate = (tanggal: string) => {
   });
   return date;
 };
+
+export const dateFormatID = (tanggal: string) => {
+  const date = new Date(tanggal).toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  return date;
+};

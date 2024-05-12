@@ -49,9 +49,9 @@ const DropdownUser = () => {
       icon: 'question',
       title: 'LogOut',
       text: 'Yakin akan logout?',
-      confirmButtonText: 'Iya',
+      confirmButtonText: 'Yes',
       showCancelButton: true,
-      cancelButtonText: 'Tidak',
+      cancelButtonText: 'No',
     }).then(async (res) => {
       if (res.isConfirmed) {
         try {
@@ -83,7 +83,7 @@ const DropdownUser = () => {
         to="#"
       >
         <span className="hidden text-right lg:block">
-          <span className="block text-base font-medium text-black dark:text-white">
+          <span className="block text-base font-medium text-[#201650] dark:text-white">
             {nama}
           </span>
           <span className="block text-sm">
@@ -128,7 +128,7 @@ const DropdownUser = () => {
         }`}
       >
         <button
-          className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-[#00c45e] lg:text-base"
+          className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-[#5537f4] lg:text-base"
           onClick={handlerLogut}
         >
           <svg

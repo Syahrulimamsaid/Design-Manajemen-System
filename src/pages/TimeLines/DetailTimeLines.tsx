@@ -12,16 +12,28 @@ import 'react-vertical-timeline-component/style.min.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getTimelines } from '../../Helpers/API/TimeLines/TimeLines';
 import dateFormat from 'dateformat';
+import { dateFormatID } from '../../Helpers/Date/FormatDate';
+import ButtonPositive from '../../layout/Button/ButtonPositive';
 
 const DetailTimeLinesJob = () => {
   const location = useLocation();
   const { kode } = location.state || {};
+  const { job_kode } = location.state || {};
   const { nama } = location.state || {};
   const { perusahaan } = location.state || {};
   const { tanggal_kirim } = location.state || {};
-  const { tanggal_pengumpulan } = location.state || {};
+  const { tanggapan_customer } = location.state || {};
   const { designer } = location.state || {};
   const { status } = location.state || {};
+
+  const [getKode, setGetKode] = useState('');
+  const [getJobKode, setGetJobKode] = useState('');
+  const [getNama, setGetNama] = useState('');
+  const [getPerusahaan, setPerusahaan] = useState('');
+  const [getTanggalKirim, setTanggalKirim] = useState('');
+  const [getDesigner, setDesigner] = useState('');
+  const [getTanggapan, setTanggapan] = useState('');
+  const [getStatus, setStatus] = useState(0);
 
   const role = localStorage.getItem('role');
 
@@ -33,7 +45,7 @@ const DetailTimeLinesJob = () => {
 
   const handlerGetData = async () => {
     try {
-      const allJob = await getTimelines(token, kode);
+      const allJob = await getTimelines(token, getKode);
       setDataTimeLines(allJob.data);
     } catch (err) {
       if (err instanceof Error) {
@@ -47,8 +59,19 @@ const DetailTimeLinesJob = () => {
   };
 
   useEffect(() => {
-    handlerGetData();
-  }, []);
+    setGetKode(kode);
+    setGetJobKode(job_kode);
+    setGetNama(nama);
+    setPerusahaan(perusahaan);
+    setTanggalKirim(tanggal_kirim);
+    setDesigner(designer);
+    setTanggapan(tanggapan_customer);
+    setStatus(status);
+    // setTimeout(() => {
+    //   console.log(getKode);
+    getKode ? handlerGetData() : '';
+    // }, 500);
+  }, [getKode]);
 
   const showIcon = (event: string) => {
     const fill = '#f7f7f5';
@@ -105,7 +128,7 @@ const DetailTimeLinesJob = () => {
               <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z" />
             </svg>
           );
-        case 'Tidak Lolos Koordinator':
+        case 'Tolak Koordinator':
           return (
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +185,7 @@ const DetailTimeLinesJob = () => {
   return (
     <>
       <DefaultLayout>
-        <Breadcrumb pageName="Detail Garis Waktu Pekerjaan" />
+        <Breadcrumb pageName="Detail Traceability" />
 
         <div className="flex flex-col gap-10">
           <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
@@ -171,52 +194,62 @@ const DetailTimeLinesJob = () => {
                 <div className="flex justify-between">
                   <div className="w-full xl:w-1/3 text-center">
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Nama
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Kode
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
-                        {nama}
+                        {getJobKode}
                       </label>
                     </div>
                   </div>
                   <div className="w-full xl:w-1/3 text-center">
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Perusahaan
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Preparate
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
-                        {perusahaan}
+                        {getNama}
                       </label>
                     </div>
                   </div>
                   <div className="w-full xl:w-1/3 text-center">
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Customer
+                      </label>
+                      <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
+                        {getPerusahaan}
+                      </label>
+                    </div>
+                  </div>
+                  <div className="w-full xl:w-1/3 text-center">
+                    <div className="mb-4.5">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
                         Tanggal Kirim
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
-                        {dateFormat(tanggal_kirim, 'dddd, dd mmmm yyyy')}
+                        {dateFormatID(getTanggalKirim)}
                       </label>
                     </div>
                   </div>
-                  <div className="w-full xl:w-1/3 text-center">
-                    <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Tanggal Pengumpulan
-                      </label>
-                      <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
-                        {dateFormat(tanggal_pengumpulan, 'dddd, dd mmmm yyyy')}
-                      </label>
-                    </div>
-                  </div>
+                  {/* <div className="w-full xl:w-1/3 text-center">
+                      <div className="mb-4.5">
+                        <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                          Tanggal Pengumpulan
+                        </label>
+                        <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
+                          {dateFormat(tanggal_pengumpulan, 'dddd, dd mmmm yyyy')}
+                        </label>
+                      </div>
+                    </div> */}
                   {role != '4' ? (
                     <div className="w-full xl:w-1/3 text-center">
                       <div className="mb-4.5">
-                        <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
+                        <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
                           Designer
                         </label>
                         <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
-                          {designer}
+                          {getDesigner}
                         </label>
                       </div>
                     </div>
@@ -224,36 +257,43 @@ const DetailTimeLinesJob = () => {
                     ''
                   )}
                 </div>
+                <div className="border-t border-dashed border-[#7776ff] my-4"></div>
                 <div className="experience mt-20">
                   {getDataTimeLines != null && getDataTimeLines.length > 0 ? (
                     <VerticalTimeline lineColor="#b3b3b3" animate={true}>
                       {getDataTimeLines?.map((timelines) => (
                         <VerticalTimelineElement
                           className="vertical-timeline-element--education"
-                          iconStyle={{ background: '#00eb77' }}
+                          iconStyle={{ background: '#5537f4' }}
                           contentArrowStyle={{
                             // background: '#000',
-                            borderRight: '7px solid  #00eb77',
+                            borderRight: '7px solid  #5537f4',
                           }}
                           icon={showIcon(timelines.event)}
                           contentStyle={{
-                            background: '#cffad9',
-                            color: '#000',
+                            background: '#dde2ff',
+                            color: '#201650',
                             fontFamily: 'poppins',
-                            fontWeight: 'medium',
+                            fontWeight: 'normal',
                           }}
-                          date={dateFormat(
-                            timelines.tanggal_event,
-                            'dddd, dd mmmm yyyy || HH:MM:ss',
-                          )}
+                          date={dateFormatID(timelines.tanggal_event)}
                         >
-                          <h3 className="vertical-timeline-element-title">
-                            {timelines.event}
-                          </h3>
+                          <h3>{timelines.event}</h3>
+                          {timelines.quality_control != null &&
+                          timelines.quality_control.komentar != null ? (
+                            <p>
+                              Komentar : {timelines.quality_control.komentar}
+                            </p>
+                          ) : (
+                            ''
+                          )}
+                          {/* <div className="border-t border-dashed border-gray-400 my-4"></div>
+                          <h4 className="vertical-timeline-element-title"></h4> */}
                         </VerticalTimelineElement>
                       ))}
-
-                      {status == 6 ? (
+                      {getStatus == 6 &&
+                      getTanggapan != null &&
+                      getTanggapan === '2' ? (
                         <VerticalTimelineElement
                           iconStyle={{ background: '#e8e80c' }}
                           icon={
@@ -273,18 +313,13 @@ const DetailTimeLinesJob = () => {
                   ) : (
                     <h3 className="font-poppins font-semibold text-center text-3xl">
                       {' '}
-                      TimeLines tidak ada
+                      Traceability tidak ada
                     </h3>
                   )}
                 </div>
                 <div className="mt-20">
                   {' '}
-                  <button
-                    onClick={handleToHome}
-                    className="flex w-full justify-center rounded rounded-lg bg-[#00eb77] p-3 font-poppins font-medium text-slate-50 hover:bg-opacity-70"
-                  >
-                    Kembali
-                  </button>
+                  <ButtonPositive text="Back" Click={handleToHome} />
                 </div>
               </div>
             </div>

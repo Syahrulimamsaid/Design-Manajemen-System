@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
     <DefaultLayout>
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
         <CardDataStats
-          title= {role ==='1'? "Penugasan" : role ==='2' ? 'Ditangangi' : role==='3'? 'DiLoloskan':'Diambil'}
+          title= {role ==='1'? "Penugasan" : role ==='2' ? 'Ditangani' : role==='3'? 'DiLoloskan':'Diambil'}
           total={
             dataDash != null
               ? dataDash !== undefined

@@ -28,27 +28,32 @@ const Login: React.FC<{ onNavigate: (to: string) => void }> = ({
 
       onNavigate('/');
       setLoading(false);
-    } catch (err) {
+    } catch (err: any) {
       setLoading(false);
-      if (err instanceof Error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: err.message,
-          confirmButtonText: 'Ok',
-        }).then((res) => {
-          if (res.isConfirmed) {
-            setUsername('');
-            setPassword('');
-            setTimeout(() => {
-              if (usernameRef.current) {
-                usernameRef.current.focus();
-              }
-            }, 500);
-          }
-        });
-      }
+      // if (err instanceof Error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.response.data.message,
+        confirmButtonText: 'Ok',
+      }).then((res) => {
+        if (res.isConfirmed) {
+          setUsername('');
+          setPassword('');
+          setTimeout(() => {
+            if (usernameRef.current) {
+              usernameRef.current.focus();
+            }
+          }, 500);
+        }
+      });
+      // }
     }
+
+    // setLoading(true);
+    // setTimeout(() => {
+    //   setLoading(false);
+    // }, 2000);
   };
 
   return (
@@ -59,7 +64,7 @@ const Login: React.FC<{ onNavigate: (to: string) => void }> = ({
             <div className="py-17.5 px-50 text-center">
               <span className="mt-15 inline-block">
                 <img
-                  src="src/images/icon/iconLogin.svg"
+                  src="src/images/icon/iconLogin3.svg"
                   alt="iconLogin"
                   height="700"
                   width="700"
@@ -88,7 +93,7 @@ const Login: React.FC<{ onNavigate: (to: string) => void }> = ({
                       type="username"
                       placeholder="Enter your username"
                       className="w-full rounded-lg border border-stroke
-                       bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-green-500 focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                       bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-[#5537f4] focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       required
                       value={username}
                       ref={usernameRef}
@@ -107,7 +112,7 @@ const Login: React.FC<{ onNavigate: (to: string) => void }> = ({
                       type={showPass ? 'text' : 'password'}
                       required
                       placeholder="Enter your password with number"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-green-500 focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-[#5537f4] focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                     />
@@ -149,16 +154,18 @@ const Login: React.FC<{ onNavigate: (to: string) => void }> = ({
 
                 <div className="mb-5 flex justify-center items-center">
                   {loading ? (
-                    <l-dot-stream
-                      size="100"
-                      speed="3"
-                      color="green"
-                    ></l-dot-stream>
+                    <div className="mt-4 mb-4">
+                      <l-dot-stream
+                        size="100"
+                        speed="3"
+                        color="#6456FE"
+                      ></l-dot-stream>
+                    </div>
                   ) : (
                     <input
                       type="submit"
                       value="Login"
-                      className="w-full cursor-pointer rounded-lg border border-gray-300 h-14 bg-gradient-to-r from-[#28ff97] to-[#00cd61] p-4 text-slate-50 font-semibold text-xl transition hover:bg-opacity-90"
+                      className="w-full cursor-pointer rounded-lg border border-gray-300 h-14 bg-gradient-to-r from-[#5537f4] to-[#6456fe] p-4 text-slate-50 font-poppins font-semibold text-xl transition hover:bg-opacity-90"
                     />
                   )}
                 </div>

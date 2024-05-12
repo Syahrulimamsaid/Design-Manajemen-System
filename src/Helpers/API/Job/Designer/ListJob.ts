@@ -7,7 +7,6 @@ export async function getAllJob(token: string | null) {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(res);
     return res.data;
   } catch (error) {
     return Promise.reject(error);

@@ -18,6 +18,7 @@ const Design = (props: DesignProps) => {
   const handleGetDesignResult = async () => {
     try {
       const design = await getDesignResult(token, data_design);
+      
       const url = window.URL.createObjectURL(new Blob([design]));
       if (linkRef.current) {
         linkRef.current.href = url;
@@ -33,40 +34,49 @@ const Design = (props: DesignProps) => {
     }
   };
 
-  useEffect(() => {
-  });
+  useEffect(() => {});
 
   return (
     <>
-      <div className="" style={{ cursor: 'pointer' }}>
-        {data_design ? (
-          <Tooltip
-            children={
-              <div>
-                <SlPicture
-                  size={230}
-                  className="w-full items-center"
-                  fill="#00eb77"
-                  onClick={handleGetDesignResult}
-                />
-              </div>
-            }
-            title="Klik untuk donwload"
-          ></Tooltip>
-        ) : (
-          <Tooltip
-            children={
-              <div>
-                <SlPicture
-                  size={230}
-                  className="w-full items-center"
-                  fill="grey"
-                />
-              </div>
-            }
-            title="Hasil pekerjaan tidak ada"
-          ></Tooltip>
-        )}
+      <div className="mb-4.5">
+        <label className="mb-2.5 block font-poppins font-semibold text-black  text-center dark:text-white">
+          File Hasil Pekerjaan
+        </label>
+        <div className="" style={{ cursor: 'pointer' }}>
+          {data_design ? (
+            <div className="text-center">
+              {' '}
+              <p className="fonr-medium text-md text-slate-400 italic">
+                Klik area dibawah untuk download
+              </p>
+              <Tooltip
+                children={
+                  <div
+                    onClick={handleGetDesignResult}
+                    className="mt-5 border border-solid border-slate-500 bg-gray w-full flex flex-col justify-center items-center pl-15 pr-15 pt-10 pb-10 min-w-100 min-h-70"
+                  >
+                    <SlPicture fill="#3b25ad" size={150} />
+                    <p>{data_design}</p>
+                  </div>
+                }
+                title="Klik untuk donwload"
+              ></Tooltip>
+            </div>
+          ) : (
+            <Tooltip
+              children={
+                <div>
+                  <SlPicture
+                    size={230}
+                    className="w-full items-center"
+                    fill="grey"
+                  />
+                </div>
+              }
+              title="Hasil pekerjaan tidak ada"
+            ></Tooltip>
+          )}
+        </div>
       </div>
     </>
   );

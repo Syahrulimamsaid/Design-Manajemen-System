@@ -11,4 +11,6 @@ interface Job {
   tanggapan_customer:number;
   tanggal_diterima:string;
   status: string;
+  designer:string;
+  tanggal_pengumpulan:string;
 }

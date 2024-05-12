@@ -11,10 +11,15 @@ import { responseCustomer } from '../../Helpers/API/Job/CS/FinallingJob';
 import { notify } from '../../Helpers/Notify/Notify';
 import dateFormat from 'dateformat';
 import Design from '../../layout/Data/GetDesign';
+import { dateFormatID } from '../../Helpers/Date/FormatDate';
+import ButtonNegative from '../../layout/Button/ButtonNegative';
+import ButtonPositive from '../../layout/Button/ButtonPositive';
+import Swal from 'sweetalert2';
 
 export interface ResponseProps {
   open: boolean;
-  onClose: (value: string) => void;
+  onClose: (value: number) => void;
+  kode: string;
   job_kode: string;
   nama: string;
   perusahaan: string;
@@ -30,6 +35,7 @@ function ResponseJob(props: ResponseProps) {
     open,
     nama,
     job_kode,
+    kode,
     perusahaan,
     tanggal_kirim,
     tanggal_pengumpulan,
@@ -39,7 +45,7 @@ function ResponseJob(props: ResponseProps) {
 
   const handleClose = (event: React.FormEvent) => {
     event.preventDefault();
-    onClose('');
+    onClose(1);
   };
 
   const token = localStorage.getItem('token');
@@ -76,47 +82,71 @@ function ResponseJob(props: ResponseProps) {
     event: React.FormEvent,
     tanggapan: number,
   ) => {
-    event.preventDefault();
-    setLoading(true);
-    try {
-      await responseCustomer(token, job_kode,tanggapan);
-      setLoading(false);
-      onClose('');
-      notify('Berhasil menanggapi', 'success');
-    } catch (err) {
-      setLoading(false);
-      onClose('');
-      if (err instanceof Error) {
-        notify(err.message, 'error');
+    onClose(1);
+    Swal.fire({
+      icon: 'question',
+      title: 'Final',
+      text: 'Yakin menyelesaikan pekerjaan ini ?',
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+    }).then(async (res) => {
+      if (res.isConfirmed) {
+        event.preventDefault();
+        setLoading(true);
+        try {
+          await responseCustomer(token, kode, tanggapan);
+          setLoading(false);
+          onClose(1);
+          notify('Berhasil menanggapi', 'success');
+        } catch (err) {
+          setLoading(false);
+          onClose(1);
+          if (err instanceof Error) {
+            notify(err.message, 'error');
+          }
+        }
       }
-    }
+    });
   };
 
+  const handleTo = (event: React.FormEvent) => {
+    event.preventDefault();
+    onClose(3);
+  };
   return (
     <>
       <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md">
         <div className="sm:grid-cols-2">
           <div className="flex flex-col gap-9">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                <h3 className="font-bold font-poppins text-black dark:text-white">
-                  Penyelesaian Pekerjaan
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark pl-2 pr-2">
+              <div className="border-b border-[#342689] py-4 px-6.5 dark:border-strokedark">
+                <h3 className="font-bold font-poppins text-[#201650] dark:text-white">
+                  Job Finalling
                 </h3>
               </div>
               <div className="p-3 mb-4.5 flex flex-col gap-6 xl:flex-row w-full">
                 <div className="w-full xl:w-1/2">
                   <div className="p-6.5">
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Nama
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Kode
+                      </label>
+                      <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
+                        {job_kode}
+                      </label>
+                    </div>
+                    <div className="mb-4.5">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Preparate
                       </label>
                       <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
                         {nama}
                       </label>
                     </div>
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Perusahaan
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Customer
                       </label>
                       <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
                         {perusahaan}
@@ -124,25 +154,24 @@ function ResponseJob(props: ResponseProps) {
                     </div>
 
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                      <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                         Tanggal Kirim
                       </label>
                       <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
-                        {dateFormat(tanggal_kirim,'dddd, dd mmmm yyyy')}
+                        {dateFormatID(tanggal_kirim)}
                       </label>
                     </div>
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                      <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                         Tanggal Pengumpulan
                       </label>
                       <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
-                        {dateFormat(tanggal_pengumpulan,'dddd, dd mmmm yyyy')}
+                        {dateFormatID(tanggal_pengumpulan)}
                       </label>
                     </div>
 
-
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                      <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                         Designer
                       </label>
                       <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
@@ -153,12 +182,7 @@ function ResponseJob(props: ResponseProps) {
                 </div>
                 <div className="w-full xl:w-1/3">
                   <div className="p-6.5 flex justify-center items-center">
-                    <div className="mb-4.5 ">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white text-center">
-                        Hasil Pekerjaan
-                      </label>
-                      <Design data_design={hasil_design}/>
-                    </div>
+                    <Design data_design={hasil_design} />
                   </div>
                 </div>
               </div>
@@ -168,30 +192,23 @@ function ResponseJob(props: ResponseProps) {
                     <l-dot-stream
                       size="100"
                       speed="3"
-                      color="green"
+                      color="#6456FE"
                     ></l-dot-stream>
                   </div>
                 ) : (
                   <div className="flex justify-center w-full gap-7">
-                    <button
-                      className="flex w-full justify-center rounded bg-slate-50 rounded-lg border border-slate-400 p-3 font-poppins font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={handleClose}
-                    >
-                      Batal
-                    </button>
+                    <ButtonNegative text="Cancel" Click={handleClose} />
 
                     <button
-                      onClick={(event) => handleResponseJob(event, 1)}
+                      onClick={(event) => handleTo(event)}
                       className="flex w-full justify-center rounded rounded-lg bg-[#ff0d0d] p-3 font-poppins font-medium text-slate-50 hover:bg-opacity-70"
                     >
-                      Ditolak
+                      Reject
                     </button>
-                    <button
-                      onClick={(event) => handleResponseJob(event, 2)}
-                      className="flex w-full justify-center rounded rounded-lg bg-[#00eb77] p-3 font-poppins font-medium text-slate-50 hover:bg-opacity-70"
-                    >
-                      Diterima
-                    </button>
+                    <ButtonPositive
+                      text="Final"
+                      Click={(event) => handleResponseJob(event, 2)}
+                    />
                   </div>
                 )}
               </div>

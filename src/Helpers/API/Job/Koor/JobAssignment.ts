@@ -1,8 +1,20 @@
+import { FormatDate } from '../../../Date/FormatDate';
 import URL from '../../URL';
 
 export async function getJobAssignment(token: string | null) {
   try {
     const res = await URL.get('/job', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+export async function jobOnProgress(token: string | null,kode:string) {
+  try {
+    const res = await URL.get(`/jobOnProgress/${kode}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
@@ -18,8 +30,7 @@ export async function jobShceduled(
   tanggal_pengumpulan: string,
 ) {
   try {
-    const selectedDate = new Date(tanggal_pengumpulan);
-    const formattedDate = selectedDate.toISOString().split('T')[0];
+    const formattedDate = FormatDate(tanggal_pengumpulan);
     const res = await URL.post(
       '/jobschedulling',
       {

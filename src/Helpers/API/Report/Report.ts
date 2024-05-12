@@ -28,9 +28,23 @@ export async function getReportDesigner(token: string | null,kode:string|null) {
   }
 }
 
-export async function getDataCalendar(token: string | null) {
+export async function getDataCalendar(token: string | null,designer:string) {
   try {
-    const res = await URL.get(`/calendar`, {
+    const res = await URL.get(`/calendar/${designer}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+export async function getRevisionDetail(token: string | null,kode:string) {
+  try {
+    const res = await URL.get(`/revisionDetail/${kode}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

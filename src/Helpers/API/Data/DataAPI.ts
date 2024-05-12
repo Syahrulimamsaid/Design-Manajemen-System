@@ -63,7 +63,7 @@ export async function getData(
 export async function getDesignResult(token: string | null, nama: string) {
   try {
     const res = await URL.get(`/design/${nama}`, {
-      responseType:'blob',
+      responseType: 'blob',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -81,6 +81,20 @@ export async function getDesignResult(token: string | null, nama: string) {
     link.click();
 
     window.URL.revokeObjectURL(url);
+
+    return res.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+export async function getAllData(token: string | null) {
+  try {
+    const res = await URL.get(`/data`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return res.data;
   } catch (error) {

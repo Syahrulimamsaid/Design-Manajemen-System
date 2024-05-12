@@ -13,11 +13,18 @@ import { dotStream } from 'ldrs';
 import { ToastContainer, toast } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
-import { deleteData, getData } from '../../Helpers/API/Data/DataAPI';
+import {
+  deleteData,
+  getAllData,
+  getData,
+} from '../../Helpers/API/Data/DataAPI';
 import DatePicker from '../../components/Forms/DatePicker/DatePicker';
 import { tailChase } from 'ldrs';
 import { notify } from '../../Helpers/Notify/Notify';
 import { isText } from '../../Helpers/TextContent/TextContent';
+import dateFormat from 'dateformat';
+import ButtonNegative from '../../layout/Button/ButtonNegative';
+import ButtonPositive from '../../layout/Button/ButtonPositive';
 
 export interface SimpleDialogProps {
   open: boolean;
@@ -77,6 +84,8 @@ function UpdateJob(props: SimpleDialogProps) {
   const [statusPerusahaan, setStatusPerusahaan] = useState(false);
   const [statusTanggalKirim, setStatusTanggalKirim] = useState(false);
 
+  const [allData, setAllData] = useState<DataPendukung[] | null>(null);
+
   const handleKonfirm = (event: React.FormEvent) => {
     event.preventDefault();
     setKonfirm(!konfirmGet);
@@ -86,15 +95,11 @@ function UpdateJob(props: SimpleDialogProps) {
     if (open) {
       setNama(nama);
       setPerusahaan(perusahaan);
-      const selectedDate = new Date(tanggal_kirim);
-      const formattedDate = selectedDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      });
-      setTanggalKirim(formattedDate);
+
+      setTanggalKirim(dateFormat(tanggal_kirim, 'dddd, dd mmmm yyyy'));
       setCatatan(catatan);
       handleGetFiles();
+      handleGetAllData();
     }
   }, [open]);
 
@@ -131,9 +136,31 @@ function UpdateJob(props: SimpleDialogProps) {
     event.preventDefault();
     if (event.target && event.target.files) {
       const files = event.target.files;
-      setSelectedFiles((prevFiles) => {
-        return prevFiles ? mergeFileLists(prevFiles, files) : files;
-      });
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        const isFileExist = allData?.some((data) => data.nama === file.name);
+
+        if (isFileExist) {
+          notify(`${file.name} sudah ada di penyimpanan`, 'error');
+        } else {
+          setSelectedFiles((prevFiles) => {
+            return prevFiles ? mergeFileLists(prevFiles, [file]) : file;
+          });
+        }
+      }
+    }
+  };
+
+  const handleGetAllData = async () => {
+    try {
+      const data = await getAllData(token);
+      setAllData(data.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      }
     }
   };
 
@@ -201,7 +228,6 @@ function UpdateJob(props: SimpleDialogProps) {
     if (!namaGet || !perusahaanGet || !tanggalKirimGet) {
       notify('Data belum lengkap', 'info');
     } else if (namaGet && perusahaanGet && tanggalKirimGet) {
-
       if (isText(namaGet) == false) {
         notify('Nama harus mengandung Alfabet', 'info');
       } else if (isText(perusahaanGet) == false) {
@@ -300,18 +326,18 @@ function UpdateJob(props: SimpleDialogProps) {
       <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md">
         <div className="sm:grid-cols-2">
           <div className="flex flex-col gap-9">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                <h3 className="font-bold font-poppins text-black dark:text-white">
-                  Ubah Pekerjaan
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark pr-2 pl-2">
+              <div className="border-b border-[#342689] py-4 px-6.5 dark:border-strokedark">
+                <h3 className="font-bold font-poppins text-[#201650] dark:text-white">
+                  Change Job
                 </h3>
               </div>
-              <form className="w-full" onSubmit={handleUpdateJob}>
+              <form className="w-full">
                 <div className="p-6.5">
                   <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                     <div className="w-full xl:w-1/2">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Nama{' '}
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Preparate{' '}
                         <Tooltip
                           children={<span className="text-meta-1">*</span>}
                           title="Bidang kolom ini harus diisi."
@@ -320,10 +346,10 @@ function UpdateJob(props: SimpleDialogProps) {
                       <input
                         type="text"
                         placeholder="Masukkan nama pekerjaan"
-                        className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#00eb77] ${
+                        className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-[#201650] outline-none transition disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#7776ff] ${
                           statusNama === true
                             ? 'border-[#ff0d0d] focus:border-[#ff0d0d] active:border-[#ff0d0d]'
-                            : 'focus:border-[#00eb77] active:border-[#00eb77]'
+                            : 'focus:border-[#7776ff] active:border-[#7776ff]'
                         }`}
                         value={namaGet}
                         onChange={(event) => setNama(event.target.value)}
@@ -332,8 +358,8 @@ function UpdateJob(props: SimpleDialogProps) {
                     </div>
 
                     <div className="w-full xl:w-1/2">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Perusahaan{' '}
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Customer{' '}
                         <Tooltip
                           children={<span className="text-meta-1">*</span>}
                           title="Bidang kolom ini harus diisi."
@@ -342,10 +368,10 @@ function UpdateJob(props: SimpleDialogProps) {
                       <input
                         type="text"
                         placeholder="Masukkan nama perusahaan"
-                        className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition  disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#00eb77] ${
+                        className={`w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-[#201650] outline-none transition  disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#7776ff] ${
                           statusPerusahaan === true
                             ? 'border-[#ff0d0d] focus:border-[#ff0d0d] active:border-[#ff0d0d]'
-                            : 'focus:border-[#00eb77] active:border-[#00eb77]'
+                            : 'focus:border-[#7776ff] active:border-[#7776ff]'
                         }`}
                         value={perusahaanGet}
                         onChange={(event) => setPerusahaan(event.target.value)}
@@ -357,7 +383,7 @@ function UpdateJob(props: SimpleDialogProps) {
                   </div>
 
                   <div className="mb-4.5">
-                    <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                    <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                       Tanggal Kirim{' '}
                       <Tooltip
                         children={<span className="text-meta-1">*</span>}
@@ -373,7 +399,7 @@ function UpdateJob(props: SimpleDialogProps) {
                   </div>
 
                   <div className="mb-4.5">
-                    <label className="mb-2.5 block text-black font-poppins fon  t-semibold dark:text-white">
+                    <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                       Data Pendukung
                     </label>
                     <div className="flex justify-between items-center">
@@ -390,7 +416,7 @@ function UpdateJob(props: SimpleDialogProps) {
                             <l-tail-chase
                               size="35"
                               speed="1.75"
-                              color="green"
+                              color="#6456FE"
                             ></l-tail-chase>
                           ) : (
                             selectedFiles &&
@@ -399,7 +425,7 @@ function UpdateJob(props: SimpleDialogProps) {
                                 <div className="relative inline-block">
                                   <button
                                     type="button"
-                                    className="absolute top-0 right-0 bg-slate-300 text-black font-bold rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                                    className="absolute top-0 right-0 bg-slate-300 text-[#201650] font-bold rounded-full w-4 h-4 flex items-center justify-center text-xs"
                                     onClick={(event) => handleRemoveFile(index)}
                                   >
                                     <svg
@@ -412,7 +438,7 @@ function UpdateJob(props: SimpleDialogProps) {
                                     </svg>
                                   </button>
                                   <img
-                                    src="src/images/icon/file-solid.svg"
+                                    src="src/images/icon/file.svg"
                                     alt={`File ${index + 1}`}
                                     className="ml-2 w-10 h-10"
                                   />
@@ -459,12 +485,12 @@ function UpdateJob(props: SimpleDialogProps) {
                         <span className="ml-10 w-60">
                           <button
                             type="button"
+                            onClick={handleKonfirm}
                             className={`flex w-full justify-center rounded rounded-lg border p-1 font-poppins font-reguler ${
                               konfirmGet === true
-                                ? 'border-[#00eb77] text-[#00eb77]'
-                                : 'border-slate-400 text-slate-400'
-                            } hover:bg-slate-100`}
-                            onClick={handleKonfirm}
+                                ? 'border-[#492AD8] text-[#ECEFFF] bg-[#492AD8] hover:bg-[#6456FE]'
+                                : 'border-slate-400 text-slate-400 hover:bg-slate-100'
+                            }`}
                           >
                             Konfirmasi Data
                           </button>
@@ -474,13 +500,13 @@ function UpdateJob(props: SimpleDialogProps) {
                   </div>
 
                   <div className="mb-6">
-                    <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                    <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                       Catatan
                     </label>
                     <textarea
                       rows={6}
                       placeholder="Masukkan catatan"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-[#00eb77] active:border-[#00eb77] disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#00eb77]"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-[#201650] outline-none transition focus:border-[#7776ff] active:border-[#7776ff] disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-[#7776ff]"
                       value={catatanGet}
                       onChange={(event) => setCatatan(event.target.value)}
                     ></textarea>
@@ -491,24 +517,13 @@ function UpdateJob(props: SimpleDialogProps) {
                         <l-dot-stream
                           size="100"
                           speed="3"
-                          color="green"
+                          color="#6456FE"
                         ></l-dot-stream>
                       </div>
                     ) : (
                       <div className="flex justify-center w-full gap-7">
-                        <button
-                          type="button"
-                          className="flex w-full justify-center rounded bg-slate-50 rounded-lg border border-slate-400 p-3 font-poppins font-medium text-slate-700 hover:bg-slate-100"
-                          onClick={handleClose}
-                        >
-                          Batal
-                        </button>
-                        <button
-                          type="submit"
-                          className="flex w-full justify-center rounded rounded-lg bg-[#00eb77] p-3 font-poppins font-medium text-slate-50 hover:bg-opacity-70"
-                        >
-                          Ubah
-                        </button>
+                        <ButtonNegative text="Cancel" Click={handleClose} />
+                        <ButtonPositive text="Change" Click={handleUpdateJob} />
                       </div>
                     )}
                   </div>

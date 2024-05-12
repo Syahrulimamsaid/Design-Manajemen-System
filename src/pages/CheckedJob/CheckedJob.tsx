@@ -1,15 +1,18 @@
-import {  useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import { SlArrowRightCircle } from 'react-icons/sl';
+import { SlArrowRightCircle, SlCheck } from 'react-icons/sl';
 import DefaultLayout from '../../layout/DefaultLayout';
 import React from 'react';
-import { ToastContainer,  } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getCheck } from '../../Helpers/API/Job/QC/CheckJob';
 import ResponseCheck from './ResponseCheck';
 import { notify } from '../../Helpers/Notify/Notify';
 import CancelJob from './CancelJob';
 import dateFormat from 'dateformat';
+import { dateFormatID } from '../../Helpers/Date/FormatDate';
+import { Tooltip } from '@mui/material';
+import LoaderTable from '../../layout/LoaderTable/Loader';
 
 const CheckedJob = () => {
   const [getDataJobCheck, setDataCheckJob] = useState<JobAssignment[] | null>(
@@ -30,12 +33,16 @@ const CheckedJob = () => {
   const [data_pendukung, setDataPendukung] = useState<DataPendukung[] | null>(
     null,
   );
-  const [job_kode, setKode] = useState('');
+  const [job_kode, setJobKode] = useState('');
+  const [kode, setKode] = useState('');
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
 
+  const [loading,setLoading]=useState(false);
+
   const handleOpenView = (
     kode: string,
+    job_kode: string,
     nama: string,
     perusahaan: string,
     tanggal_pengumpulan: string,
@@ -46,6 +53,7 @@ const CheckedJob = () => {
     data_pendukung: any,
   ) => {
     setKode(kode);
+    setJobKode(job_kode);
     setNama(nama);
     setPerusahaan(perusahaan);
     setTanggalKirim(tanggal_kirim);
@@ -55,7 +63,6 @@ const CheckedJob = () => {
     setHasilDesign(hasil_design);
     setDataPendukung(data_pendukung);
     setOpen(true);
-    console.log(hasil_design);
   };
 
   const handleClose = (value: number) => {
@@ -65,13 +72,16 @@ const CheckedJob = () => {
   };
 
   const handlerGetData = async () => {
+    setLoading(true);
     try {
       const data = await getCheck(token);
       role == '1' ? setDataCheckJobKoor(data.data) : setDataCheckJob(data.data);
+      setLoading(false);
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       }
+      setLoading(false);
     }
   };
 
@@ -91,90 +101,114 @@ const CheckedJob = () => {
   return (
     <>
       <DefaultLayout>
-        <Breadcrumb pageName="Pemeriksaan Pekerjaan" />
+        <Breadcrumb pageName="Job Checking" />
 
         <div className="flex flex-col gap-10">
           <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
             <div className="max-w-full overflow-x-auto">
               <table className="w-full table-auto">
                 <thead>
-                  <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                    <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                      Nama
+                  <tr className="bg-[#c2c9ff] text-left dark:bg-meta-4">
+                    <th className="min-w-[220px] py-4 px-4 font-medium text-[#201650] dark:text-white xl:pl-11">
+                      Kode
                     </th>
-                    <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                      Perusahaan
+                    <th className="min-w-[150px] py-4 px-4 font-medium text-[#201650] dark:text-white">
+                      Preparate
                     </th>
-                    <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="min-w-[150px] py-4 px-4 font-medium text-[#201650] dark:text-white">
+                      Customer
+                    </th>
+                    <th className="min-w-[150px] py-4 px-4 font-medium text-[#201650] dark:text-white">
                       Tanggal Kirim
                     </th>
-                    <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="min-w-[120px] py-4 px-4 font-medium text-[#201650] dark:text-white">
                       Tanggal Pengumpulan
                     </th>
-                    <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+                    <th className="min-w-[120px] py-4 px-4 font-medium text-[#201650] dark:text-white">
                       Designer
                     </th>
-                    <th className="py-4 px-4 font-medium text-black dark:text-white">
-                      Tindakan
-                    </th>
+                    <th className="py-4 px-4 font-medium text-[#201650] dark:text-white"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {role == '1' ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className='text-center'>
+                        <LoaderTable />
+                      </td>
+                    </tr>
+                  ) : role == '1' ? (
                     getDataJobCheckKoor && getDataJobCheckKoor.length > 0 ? (
                       getDataJobCheckKoor
                         .filter((checkJob) => checkJob.status == 0)
                         .map((checkJob, index) => (
                           <tr key={index}>
-                            <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                              <h5 className="font-medium text-black dark:text-white">
-                                {checkJob.job_assignment.job.nama}
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                              <h5 className="font-medium text-[#201650] dark:text-white">
+                                {checkJob.job_assignment.job.kode}
                               </h5>
                             </td>
-                            <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                              <p className="text-black dark:text-white">
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 dark:border-strokedark">
+                              <p className="text-[#201650] dark:text-white">
+                                {checkJob.job_assignment.job.nama}
+                              </p>
+                            </td>
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 dark:border-strokedark">
+                              <p className="text-[#201650] dark:text-white">
                                 {checkJob.job_assignment.job.perusahaan}
                               </p>
                             </td>
-                            <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                              <p className="text-black dark:text-white">
-                                {dateFormat( checkJob.job_assignment.job.tanggal_kirim,'dddd, dd mmmm yyyy')}
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 dark:border-strokedark">
+                              <p className="text-[#201650] dark:text-white">
+                                {dateFormatID(
+                                  checkJob.job_assignment.job.tanggal_kirim,
+                                )}
                               </p>
                             </td>
-                            <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                              <p className="text-black dark:text-white">
-                                {dateFormat(checkJob.job_assignment.tanggal_pengumpulan,'dddd, dd mmmm yyyy')}
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 dark:border-strokedark">
+                              <p className="text-[#201650] dark:text-white">
+                                {dateFormatID(
+                                  checkJob.job_assignment.tanggal_pengumpulan,
+                                )}
                               </p>
                             </td>
-                            <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                              <p className="text-black dark:text-white">
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 dark:border-strokedark">
+                              <p className="text-[#201650] dark:text-white">
                                 {checkJob.job_assignment.user.nama}
                               </p>
                             </td>
-                            <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                            <td className="border-b border-[#eee] bg-[#f4fff2] py-5 px-4 dark:border-strokedark">
                               <div className="flex items-center space-x-3.5">
-                                <button className="hover:text-success">
-                                  <SlArrowRightCircle
-                                    size={20}
-                                    onClick={() =>
-                                      handleOpenView(
-                                        checkJob.job_assignment.kode,
-                                        checkJob.job_assignment.job.nama,
-                                        checkJob.job_assignment.job.perusahaan,
-                                        checkJob.job_assignment
-                                          .tanggal_pengumpulan,
-                                        checkJob.job_assignment.job
-                                          .tanggal_kirim,
-                                        checkJob.job_assignment.user.nama,
-                                        checkJob.job_assignment.job.catatan,
-                                        checkJob.job_assignment.job
-                                          .hasil_design,
-                                        checkJob.job_assignment.job
-                                          .data_pendukung,
-                                      )
-                                    }
-                                  />
-                                </button>
+                                <Tooltip
+                                  title="Check"
+                                  children={
+                                    <button className="text-[#5537f4] hover:text-slate-900">
+                                      <SlCheck
+                                        size={22}
+                                        strokeWidth={25}
+                                        onClick={() =>
+                                          handleOpenView(
+                                            checkJob.job_assignment.kode,
+                                            checkJob.job_assignment.job.kode,
+                                            checkJob.job_assignment.job.nama,
+                                            checkJob.job_assignment.job
+                                              .perusahaan,
+                                            checkJob.job_assignment
+                                              .tanggal_pengumpulan,
+                                            checkJob.job_assignment.job
+                                              .tanggal_kirim,
+                                            checkJob.job_assignment.user.nama,
+                                            checkJob.job_assignment.job.catatan,
+                                            checkJob.job_assignment.job
+                                              .hasil_design,
+                                            checkJob.job_assignment.job
+                                              .data_pendukung,
+                                          )
+                                        }
+                                      />
+                                    </button>
+                                  }
+                                />
                               </div>
                             </td>
                           </tr>
@@ -193,50 +227,62 @@ const CheckedJob = () => {
                     getDataJobCheck?.map((checkJob, index) => (
                       <tr key={index}>
                         <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                          <h5 className="font-medium text-black dark:text-white">
-                            {checkJob.job.nama}
+                          <h5 className="font-medium text-[#201650] dark:text-white">
+                            {checkJob.job.kode}
                           </h5>
                         </td>
                         <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                          <p className="text-black dark:text-white">
+                          <p className="text-[#201650] dark:text-white">
+                            {checkJob.job.nama}
+                          </p>
+                        </td>
+                        <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                          <p className="text-[#201650] dark:text-white">
                             {checkJob.job.perusahaan}
                           </p>
                         </td>
                         <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                          <p className="text-black dark:text-white">
-                            {dateFormat(checkJob.job.tanggal_kirim,'dddd, dd mmmm yyyy')}
+                          <p className="text-[#201650] dark:text-white">
+                            {dateFormatID(checkJob.job.tanggal_kirim)}
                           </p>
                         </td>
                         <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                          <p className="text-black dark:text-white">
-                            {dateFormat(checkJob.tanggal_pengumpulan,'dddd, dd mmmm yyyy')}
+                          <p className="text-[#201650] dark:text-white">
+                            {dateFormatID(checkJob.tanggal_pengumpulan)}
                           </p>
                         </td>
                         <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                          <p className="text-black dark:text-white">
+                          <p className="text-[#201650] dark:text-white">
                             {checkJob.designer.nama}
                           </p>
                         </td>
                         <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                           <div className="flex items-center space-x-3.5">
-                            <button className="hover:text-success">
-                              <SlArrowRightCircle
-                                size={20}
-                                onClick={() =>
-                                  handleOpenView(
-                                    checkJob.kode,
-                                    checkJob.job.nama,
-                                    checkJob.job.perusahaan,
-                                    checkJob.tanggal_pengumpulan,
-                                    checkJob.job.tanggal_kirim,
-                                    checkJob.designer.nama,
-                                    checkJob.job.catatan,
-                                    checkJob.job.hasil_design,
-                                    checkJob.job.data_pendukung,
-                                  )
-                                }
-                              />
-                            </button>
+                            <Tooltip
+                              title="Check"
+                              children={
+                                <button className="text-[#5537f4] m-0.5 hover:text-slate-900">
+                                  <SlCheck
+                                    size={22}
+                                    strokeWidth={25}
+                                    onClick={() =>
+                                      handleOpenView(
+                                        checkJob.kode,
+                                        checkJob.job.kode,
+                                        checkJob.job.nama,
+                                        checkJob.job.perusahaan,
+                                        checkJob.tanggal_pengumpulan,
+                                        checkJob.job.tanggal_kirim,
+                                        checkJob.designer.nama,
+                                        checkJob.job.catatan,
+                                        checkJob.job.hasil_design,
+                                        checkJob.job.data_pendukung,
+                                      )
+                                    }
+                                  />
+                                </button>
+                              }
+                            />
                           </div>
                         </td>
                       </tr>
@@ -259,6 +305,7 @@ const CheckedJob = () => {
             onClose={handleClose}
             open={open}
             job_kode={job_kode}
+            kode={kode}
             nama={nama}
             perusahaan={perusahaan}
             tanggal_kirim={tanggalKirim}
@@ -272,6 +319,7 @@ const CheckedJob = () => {
             onClose={handleClose}
             open={openCancel}
             job_kode={job_kode}
+            kode={kode}
             nama={nama}
             perusahaan={perusahaan}
             designer={designer}

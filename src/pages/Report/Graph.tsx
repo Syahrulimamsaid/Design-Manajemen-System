@@ -5,123 +5,148 @@ import { getReport, getReportDesigner } from '../../Helpers/API/Report/Report';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { notify } from '../../Helpers/Notify/Notify';
+import ReactApexChart from 'react-apexcharts';
+import { ApexOptions } from 'apexcharts';
+import { SlInfo, SlQuestion } from 'react-icons/sl';
 
 export interface ListProps {
   monthSelect: string;
+  // designer: string;
+  designer: string[];
 }
 
 const GraphReport = (props: ListProps) => {
-  const { monthSelect } = props;
+  const { monthSelect, designer } = props;
   const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
-  const userKode = localStorage.getItem('kode');
-  const [report, setReport] = useState<Report[] | null>(null);
-  const valueFormatter = (value: number | null) => {
-    if (value !== null) {
-      return Math.round(value).toString();
-    }
-    return '';
-  };
+  const [report, setReport] = useState<[] | null>(null);
 
-  const chartSetting = {
-    // yAxis: [
-    //   {
-    //     label: 'Number',
-    //   },
-    // ],
-    width: 1385,
-    height: 600,
-    sx: {
-      [`.${axisClasses.left} .${axisClasses.label}`]: {
-        transform: 'translate(-20px, 0)',
-      },
-    },
-  };
+  const { pathname } = location;
+
+  const [widht, setWidth] = useState(1350);
 
   const handlerGetData = async () => {
-    if (role == '1' || role == '2' || role == '3') {
-      try {
-        const response = await getReport(token);
-        const filteredData = response.data[monthSelect].map((item: any) => ({
-          designer_nama: item.designer_nama,
-          revisi: item.revisi,
-          selesai: item.selesai,
-          belum_selesai: item.belum_selesai,
-          tidak_diambil: item.tidak_diambil,
-          rata_pengerjaan: item.rata_pengerjaan,
-        }));
-        setReport(filteredData);
-      } catch (err) {
-        if (err instanceof Error) {
-          notify(err.message, 'error');
-        }
+    try {
+      const response = await getReport(token);
+
+      const filteredData = response.data[monthSelect].map((item: any) => ({
+        designer: item.designer,
+        designer_nama: item.designer_nama,
+        belum_diambil: item.belum_diambil,
+        selesai: item.selesai,
+        on_progress: item.on_progress,
+        acc: item.acc,
+        revisi: item.revisi,
+      }));
+
+      let filterDesigner = filteredData;
+      if (designer) {
+        filterDesigner = filteredData.filter((item: any) =>
+          designer.includes(item.designer),
+        );
       }
-    } else {
-      try {
-        const response = await getReportDesigner(token, userKode);
-        const filteredData = response.data[monthSelect].map((item: any) => ({
-          designer_nama: item.designer_nama,
-          revisi: item.revisi,
-          selesai: item.selesai,
-          belum_selesai: item.belum_selesai,
-          tidak_diambil: item.tidak_diambil,
-          rata_pengerjaan: item.rata_pengerjaan,
-        }));
-        setReport(filteredData);
-      } catch (err) {
-        if (err instanceof Error) {
-          notify(err.message, 'error');
-        }
+      // console.log(filterDesigner);
+      setReport(filterDesigner);
+      // setReport(filteredData);
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
       }
     }
   };
 
   useEffect(() => {
     handlerGetData();
-  }, [monthSelect]);
+    // if (window.matchMedia) {
+    //   const mediaQueryList = window.matchMedia('print');
+    //   if (mediaQueryList.matches) {
+    //     // Kertas dicetak
+    //     set(400);
+    //   }
+    // }
 
-  const convertToDataset = (report: Report[]) => {
-    return report.map((item) => ({
-      designer_nama: item.designer_nama,
-      revisi: item.revisi,
-      selesai: item.selesai,
-      belum_selesai: item.belum_selesai,
-      tidak_diambil: item.tidak_diambil,
-      rata_pengerjaan: item.rata_pengerjaan,
-    }));
+    if (pathname.includes('/printlayout')) {
+      setWidth(1000);
+    } else {
+      setWidth(1350);
+    }
+  }, [monthSelect, designer]);
+
+  const chartOptions: ApexOptions = {
+    chart: {
+      type: 'bar',
+      height: 335,
+      // height: chartHeight,
+      stacked: false,
+      toolbar: {
+        show: true,
+      },
+      zoom: {
+        enabled: true,
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return val + '';
+        },
+      },
+    },
+    xaxis: {
+      categories: report ? report.map((item) => item.designer_nama) : [],
+    },
+    yaxis: {
+      min: 0,
+      labels: {
+        formatter: (val: any) => Math.floor(val).toString(),
+      },
+    },
   };
 
+  const seriesData =
+    report && Array.isArray(report) && report.length > 0
+      ? [
+          {
+            name: 'Belum Diambil',
+            data: report.map((item) => item.belum_diambil),
+          },
+          {
+            name: 'Selesai',
+            data: report.map((item) => item.selesai),
+          },
+          {
+            name: 'On Progress',
+            data: report.map((item) => item.on_progress),
+          },
+          {
+            name: 'Revisi',
+            data: report.map((item) => item.revisi),
+          },
+          {
+            name: 'Acc',
+            data: report.map((item) => item.acc),
+          },
+        ]
+      : [];
+
   return (
-    <>
-      {report && (
-        <BarChart
-          dataset={convertToDataset(report)}
-          xAxis={[{ scaleType: 'band', dataKey: 'designer_nama' }]}
-          series={[
-            { dataKey: 'revisi', label: 'Revisi', valueFormatter },
-            { dataKey: 'selesai', label: 'selesai', valueFormatter },
-            {
-              dataKey: 'belum_selesai',
-              label: 'Belum Selesai',
-              valueFormatter,
-            },
-            {
-              dataKey: 'tidak_diambil',
-              label: 'Tidak Diambil',
-              valueFormatter,
-            },
-            {
-              dataKey: 'rata_pengerjaan',
-              label: 'Rata Rata Pengerjaan',
-              valueFormatter,
-            },
-          ]}
-          colors={['#FF5733', '#33FF57', '#3357FF', '#FF33E4', '#33FFE1']}
-          {...chartSetting}
+    <div className="transition duration-300 ease-in">
+      {designer.length > 0 ? (
+        <ReactApexChart
+          options={chartOptions}
+          series={seriesData}
+          type="bar"
+          height={600}
+          width={widht}
         />
+      ) : (
+        <div className="items-center flex justif-center gap-5 mb-6">
+          <SlInfo size={25} strokeWidth={20} color="#3b25ae" />
+          <p className="text-[#707070] font-nordmal text-md font-poppins">
+            Silahkan pilih designer yang ingin ditampilkan.
+          </p>
+        </div>
       )}
-      <ToastContainer autoClose={3000} />
-    </>
+    </div>
   );
 };
 

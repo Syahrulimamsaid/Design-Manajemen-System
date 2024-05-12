@@ -20,6 +20,7 @@ export async function responseCustomer(
   token: string | null,
   kode: string,
   tanggapan: number,
+  komentar?:string,
 ) {
   try {
 
@@ -27,6 +28,7 @@ export async function responseCustomer(
       `/finallingjob/${kode}`,
       {
         tanggapan_customer: tanggapan,
+        komentar :komentar
       },
       {
         headers: {

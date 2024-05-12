@@ -4,7 +4,6 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import Login from './pages/Authentication/Login';
-import Dashboard from './pages/Dashboard/Dashboard';
 import PostingPekerjaan from './pages/Posting Job/PostJob';
 import NotFound from './pages/404/404';
 import FinallingJob from './pages/FinallingJob/FinallingJob';
@@ -14,9 +13,14 @@ import ListJob from './pages/ListJob/ListJob';
 import CheckedJob from './pages/CheckedJob/CheckedJob';
 import JobAssignment from './pages/JobAssignment/JobAssignment';
 import JobRevision from './pages/JobRevision/JobRevision';
-import GraphPrintLayout from './pages/Print/GraphPrintLayout';
 import TimeLinesJob from './pages/TimeLines/TimeLines';
 import DetailTimeLinesJob from './pages/TimeLines/DetailTimeLines';
+import User from './pages/User/User';
+import DashboardKoor from './pages/Dashboard/DashboardKoor';
+import DashboardCS from './pages/Dashboard/DashboardCS';
+import DashboardQC from './pages/Dashboard/DashboardQC';
+import DashboardDesigner from './pages/Dashboard/DashboardDesigner';
+import PrintLayout from './pages/Print/PrintLayout';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,11 +54,18 @@ function App() {
             index
             element={
               <>
-                <PageTitle title="Pura Group | Dashboard" /> <Dashboard />
+                <PageTitle title="Pura Group | Dashboard" />
+                {role == '1' ? (
+                  <DashboardKoor />
+                ) : role == '2' ? (
+                  <DashboardCS />
+                ) : (
+                  role == '3' ? <DashboardQC/>:role == '4'?<DashboardDesigner/> :''
+                )}
               </>
             }
           />
-          {role == '2' ? (
+          {role == '2' || role === '5' ? (
             <Route
               path="/postingjob"
               element={
@@ -68,7 +79,7 @@ function App() {
             ''
           )}
 
-          {role == '2' ? (
+          {role == '2' || role === '5' ? (
             <Route
               path="/finallingjob"
               element={
@@ -81,7 +92,7 @@ function App() {
           ) : (
             ''
           )}
-          {role == '1' || role == '2' ? (
+          {role == '1' || role == '2' || role === '5' ? (
             <Route
               path="/report"
               element={
@@ -94,7 +105,7 @@ function App() {
           ) : (
             ''
           )}
-          {role == '4' ? (
+          {role == '4' || role === '5' ? (
             <Route
               path="/takejob"
               element={
@@ -107,7 +118,7 @@ function App() {
           ) : (
             ''
           )}
-          {role == '4' ? (
+          {role == '4' || role === '5' ? (
             <Route
               path="/listjob"
               element={
@@ -121,7 +132,7 @@ function App() {
             ''
           )}
 
-          {role == '1' || role == '3' ? (
+          {role == '1' || role == '3' || role === '5' ? (
             <Route
               path="/checkjob"
               element={
@@ -134,7 +145,7 @@ function App() {
           ) : (
             ''
           )}
-          {role == '1' ? (
+          {role == '1' || role === '5' ? (
             <Route
               path="/jobassignment"
               element={
@@ -148,7 +159,7 @@ function App() {
             ''
           )}
 
-          {role == '1' ? (
+          {role == '1' || role === '5' ? (
             <Route
               path="/jobrevision"
               element={
@@ -162,7 +173,7 @@ function App() {
             ''
           )}
 
-          {role == '1' || role == '4' || role == '3' ? (
+          {role == '1' || role == '4' || role == '3' || role === '5' ? (
             <Route
               path="/timelines"
               element={
@@ -176,7 +187,7 @@ function App() {
             ''
           )}
 
-          {role == '1' || role == '4' || role == '3' ? (
+          {role == '1' || role == '4' || role == '3' || role === '5' ? (
             <Route
               path="/detailtimelines"
               element={
@@ -189,13 +200,26 @@ function App() {
           ) : (
             ''
           )}
+          {role === '5' ? (
+            <Route
+              path="/user"
+              element={
+                <>
+                  <PageTitle title="Pura Group | Detail Garis Waktu Pekerjaan" />
+                  <User />
+                </>
+              }
+            />
+          ) : (
+            ''
+          )}
 
           <Route
-            path="/graphlayout"
+            path="/printlayout"
             element={
               <>
-                <PageTitle title="Pura Group | Cetak Report Graph" />
-                <GraphPrintLayout />
+                <PageTitle title="Pura Group | Cetak Report" />
+              <PrintLayout/>
               </>
             }
           />

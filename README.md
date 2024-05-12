@@ -18,4 +18,4 @@ Login :
     ~ Username : designer
     ~ Password : 12345
 
-Note : Database in folder src and find design_manajemen_system.sql
+Note : Database in the API/Backend File.

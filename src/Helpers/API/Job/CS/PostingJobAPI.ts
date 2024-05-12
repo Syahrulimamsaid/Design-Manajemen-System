@@ -1,4 +1,4 @@
-import { FormatDate } from '../../../ConvertDate/FormatDate';
+import { FormatDate } from '../../../Date/FormatDate';
 import URL from '../../URL';
 
 export async function getJobPost(
@@ -103,7 +103,7 @@ export async function postData(
         Authorization: `Bearer ${token}`,
       },
     });
-    return res.statusText;
+    return res.status;
   } catch (error) {
     return Promise.reject(error);
   }

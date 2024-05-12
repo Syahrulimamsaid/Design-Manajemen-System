@@ -14,7 +14,7 @@ const Data = (props: DataProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
 
-  const handleGetData = async (nama:string) => {
+  const handleGetData = async (nama: string) => {
     const token = localStorage.getItem('token');
     try {
       const data = await getDataView(token, nama);
@@ -35,7 +35,7 @@ const Data = (props: DataProps) => {
   useEffect(() => {
     setSelectedFiles(data);
   });
-  
+
   return (
     <>
       <div className="flex w-full text-left">
@@ -59,9 +59,9 @@ const Data = (props: DataProps) => {
               <Tooltip key={index} title={file.nama}>
                 <img
                   onClick={() => handleGetData(file.nama)}
-                  src="src/images/icon/file-solid.svg"
+                  src="src/images/icon/file.svg"
                   alt={`File ${index + 1}`}
-                  className="ml-2 w-8 h-8"
+                  className="ml-2 w-10 h-10"
                   style={{ cursor: 'pointer' }}
                 />
               </Tooltip>

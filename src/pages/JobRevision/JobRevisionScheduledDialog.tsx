@@ -8,18 +8,18 @@ import { tailChase } from 'ldrs';
 import { notify } from '../../Helpers/Notify/Notify';
 import DatePicker from '../../components/Forms/DatePicker/DatePicker';
 import { jobRevisionScheduled } from '../../Helpers/API/Job/Koor/JobRevisionAPI';
-import { convertStringToDate } from '../../Helpers/ConvertDate/ConvertDate';
+import { convertStringToDate } from '../../Helpers/Date/ConvertDate';
 import { getDesigner } from '../../Helpers/API/Designer/Designer';
 import dateFormat from 'dateformat';
-import {
-  FormatDate,
-  formattedDate,
-} from '../../Helpers/ConvertDate/FormatDate';
+import { dateFormatID, formattedDate } from '../../Helpers/Date/FormatDate';
+import ButtonNegative from '../../layout/Button/ButtonNegative';
+import ButtonPositive from '../../layout/Button/ButtonPositive';
 
 export interface CancelResponseProps {
   open: boolean;
   onClose: (value: number) => void;
   kode: string;
+  job_kode: string;
   nama: string;
   perusahaan: string;
   tanggal_kirim: string;
@@ -34,6 +34,7 @@ function RevisionDialog(props: CancelResponseProps) {
     open,
     nama,
     kode,
+    job_kode,
     perusahaan,
     tanggal_kirim,
     designer,
@@ -52,8 +53,7 @@ function RevisionDialog(props: CancelResponseProps) {
   const [loading, setLoading] = useState(false);
   const [tanggal_pengumpulan, setTanggalPengumpulan] = useState('');
   const [getDataDesigner, setDataDesigner] = useState<User[] | null>(null);
-  const [statusTanggalPengumpulan, setStatusTanggalPengumpulan] =
-    useState(false);
+
   dotStream.register();
   tailChase.register();
 
@@ -75,7 +75,6 @@ function RevisionDialog(props: CancelResponseProps) {
   useEffect(() => {
     if (open) {
       handleGetDesigner();
-      // console.log(tanggal_kirim);
     }
   }, [open]);
 
@@ -87,6 +86,7 @@ function RevisionDialog(props: CancelResponseProps) {
         await jobRevisionScheduled(token, kode, tanggal_pengumpulan);
         setLoading(false);
         onClose(0);
+        setTanggalPengumpulan('');
         notify('Berhasil menjadwalkan', 'success');
       } catch (err) {
         setLoading(false);
@@ -97,7 +97,6 @@ function RevisionDialog(props: CancelResponseProps) {
         }
       }
     } else {
-      setStatusTanggalPengumpulan(true);
       notify('Tanggal pengumpulan harus diisi', 'info');
     }
   };
@@ -107,9 +106,9 @@ function RevisionDialog(props: CancelResponseProps) {
       <Dialog onClose={handleClose} open={open} fullWidth={true} maxWidth="md">
         <div className="sm:grid-cols-2">
           <div className="flex flex-col gap-9">
-            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                <h3 className="font-bold font-poppins text-black dark:text-white">
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark pl-2 pr-2">
+              <div className="border-b border-[#7776ff] py-4 px-6.5 dark:border-strokedark">
+                <h3 className="font-bold font-poppins text-[#201650] dark:text-white">
                   Penjadwalan Revisi Pekerjaan
                 </h3>
               </div>
@@ -118,8 +117,20 @@ function RevisionDialog(props: CancelResponseProps) {
                   <div className="w-full xl:w-1/3 text-center">
                     {/* <div className=""> */}
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Nama
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Kode
+                      </label>
+                      <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
+                        {job_kode}
+                      </label>
+                    </div>
+                    {/* </div> */}
+                  </div>
+                  <div className="w-full xl:w-1/3 text-center">
+                    {/* <div className=""> */}
+                    <div className="mb-4.5">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Preparate
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
                         {nama}
@@ -129,8 +140,8 @@ function RevisionDialog(props: CancelResponseProps) {
                   </div>
                   <div className="w-full xl:w-1/3 text-center">
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
-                        Perusahaan
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
+                        Customer
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
                         {perusahaan}
@@ -139,11 +150,11 @@ function RevisionDialog(props: CancelResponseProps) {
                   </div>
                   <div className="w-full xl:w-1/3 text-center">
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
                         Tanggal Kirim
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white ">
-                        {dateFormat(tanggal_kirim, 'dddd, dd mmmm yyyy')}
+                        {dateFormatID(tanggal_kirim)}
                         {/* {tanggal_kirim} */}
                       </label>
                     </div>
@@ -151,7 +162,7 @@ function RevisionDialog(props: CancelResponseProps) {
                   <div className="w-full xl:w-1/3 text-center">
                     {/* <div className="p-6.5"> */}
                     <div className="mb-4.5">
-                      <label className="mb-2.5 block font-poppins font-semibold text-black dark:text-white">
+                      <label className="mb-2.5 block font-poppins font-semibold text-[#201650] dark:text-white">
                         Designer
                       </label>
                       <label className="mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white">
@@ -160,9 +171,9 @@ function RevisionDialog(props: CancelResponseProps) {
                     </div>
                     {/* </div> */}
                   </div>
-                </div>  
+                </div>
                 <div className="mt-5 mb-4.5">
-                  <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                  <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                     Tanggal Pengumpulan Revisi{' '}
                     <Tooltip
                       children={<span className="text-meta-1">*</span>}
@@ -172,7 +183,6 @@ function RevisionDialog(props: CancelResponseProps) {
 
                   <DatePicker
                     onDateChange={handleSelectedDate}
-                    // status={statusTanggalPengumpulan}
                     dateSelected={tanggal_pengumpulan}
                     maxDate={convertStringToDate(formattedDate(tanggal_kirim))}
                   />
@@ -189,7 +199,7 @@ function RevisionDialog(props: CancelResponseProps) {
                 ))}
                 {status == 1 ? (
                   <div className="mb-4.5">
-                    <label className="mb-2.5 block text-black font-poppins font-semibold dark:text-white">
+                    <label className="mb-2.5 block text-[#201650] font-poppins font-semibold dark:text-white">
                       Komenter Quality Control
                     </label>
                     <label className="ml-5 mb-2.5 block font-poppins font-medium text-slate-600 dark:text-white min-w-96">
@@ -200,30 +210,23 @@ function RevisionDialog(props: CancelResponseProps) {
                   ''
                 )}
               </div>
-              <div className="items-center flex justify-center p-6.5">
+              <div className="items-center flex justify-center p-6.5 mt-35">
                 {loading ? (
                   <div className="flex justify-center p-4">
                     <l-dot-stream
                       size="100"
                       speed="3"
-                      color="green"
+                      color="#6456FE"
                     ></l-dot-stream>
                   </div>
                 ) : (
                   <div className="flex justify-center w-full gap-7">
-                    <button
-                      className="flex w-full justify-center rounded bg-slate-50 rounded-lg border border-slate-400 p-3 font-poppins font-medium text-slate-700 hover:bg-slate-100"
-                      onClick={handleClose}
-                    >
-                      Batal
-                    </button>
+                    <ButtonNegative text="Cancel" Click={handleClose} />
 
-                    <button
-                      onClick={(event) => handleJobRevisionScheduled(event)}
-                      className="flex w-full justify-center rounded rounded-lg bg-[#00eb77] p-3 font-poppins font-medium text-slate-50 hover:bg-opacity-70"
-                    >
-                      Kirim
-                    </button>
+                    <ButtonPositive
+                      text="Send"
+                      Click={(event) => handleJobRevisionScheduled(event)}
+                    />
                   </div>
                 )}
               </div>

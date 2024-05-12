@@ -16,6 +16,7 @@ module.exports = {
       ...defaultTheme.screens,
     },
     extend: {
+      
       colors: {
         current: 'currentColor',
         transparent: 'transparent',
@@ -241,8 +242,31 @@ module.exports = {
           '0%, 100%': { transform: 'rotate(360deg)' },
           '50%': { transform: 'rotate(0deg)' },
         },
+        bounceIn: {
+          '0%': {
+            transform: 'scale(0)',
+          },
+          '50%': {
+            transform: 'scale(1.2)',
+          },
+          '100%': {
+            transform: 'scale(1)',
+          },
+        },
+        bounce: {
+          '0%, 100%': {
+            transform: 'translateY(-2%)',
+            animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)',
+          },
+          '50%': {
+            transform: 'translateY(0)',
+            animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
+          },
+        },
       },
       animation: {
+        'bounce': 'bounce 1s infinite',
+        'bounce-in': 'bounceIn 1s ease-out',
         'ping-once': 'ping 5s cubic-bezier(0, 0, 0.2, 1)',
         rotating: 'rotating 30s linear infinite',
         'spin-1.5': 'spin 1.5s linear infinite',

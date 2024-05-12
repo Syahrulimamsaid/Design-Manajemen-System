@@ -5,9 +5,12 @@ interface Month {
 interface Report {
   designer: string;
   designer_nama: string;
-  revisi: number;
+  belum_diambil: number;
   selesai: number;
-  belum_selesai: number;
-  tidak_diambil: number;
-  rata_pengerjaan: number;
+  on_progress: number;
+  acc: number;
+  revisi: number;
+  reject_koor: number;
+  reject_qc: number;
+  reject_customer: number;
 }
